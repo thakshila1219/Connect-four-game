@@ -1,18 +1,22 @@
 package lk.ijse.dep.service;
 
 public class BoardImpl implements Board {
-    Piece[][] pieces;
-    BoardUI boardUI;
+    private final Piece[][] pieces = new Piece[NUM_OF_COLS][NUM_OF_ROWS];
+    private final BoardUI boardUI;
 
     public BoardImpl(BoardUI boardUI) {
         this.boardUI = boardUI;
-        pieces = new Piece[NUM_OF_COLS][NUM_OF_ROWS];
-        for (int i = 0; i < pieces.length; i++) {
-            for (int j = 0; j < pieces[i].length; j++) {
+
+        for(int i = 0; i<pieces.length; i++) {
+            for(int j = 0; j<pieces[i].length; j++) {
                 pieces[i][j] = Piece.EMPTY;
             }
-
         }
+    }
+
+    @Override
+    public Piece[][] getPieces() {
+        return pieces;
     }
 
     @Override
@@ -23,61 +27,60 @@ public class BoardImpl implements Board {
     @Override
     public int findNextAvailableSpot(int col) {
 
-        for (int i = 0; i < pieces[col].length; i++) {
-            if (pieces[col][i] == Piece.EMPTY) {
+        for(int i = 0; i<NUM_OF_ROWS; i++) {
+            if(pieces[col][i] == Piece.EMPTY) {
                 return i;
             }
         }
         return -1;
     }
 
-    @Override
     public boolean isLegalMove(int col) {
+
         return findNextAvailableSpot(col) != -1;
     }
 
-    @Override
     public boolean existLegalMoves() {
-        for (int i = 0; i < pieces.length; i++) {
-            for (int j = 0; j < pieces[i].length; j++) {
-                if (pieces[i][j] == Piece.EMPTY) return true;
+
+        for(int col = 0; col<NUM_OF_COLS; col++) {
+            if(isLegalMove(col)) {
+                return true;
             }
         }
         return false;
     }
 
-    @Override
     public void updateMove(int col, Piece move) {
-        pieces[col][findNextAvailableSpot(col)] = move;
+        int row = findNextAvailableSpot(col);
+        if(row != -1) {
+            pieces[col][row] = move;
+        }
     }
-
-    @Override
     public void updateMove(int col, int row, Piece move) {
-
+        pieces[col][row] = move;
     }
 
-    @Override
     public Winner findWinner() {
-        for (int i = 0; i < NUM_OF_COLS; i++) {
-            for (int j = 0; j <= NUM_OF_ROWS - 4; j++) {
-                Piece piece = pieces[i][j];
-                if (piece != Piece.EMPTY &&
-                        piece == pieces[i][j + 1] &&
-                        piece == pieces[i][j + 2] &&
-                        piece == pieces[i][j + 3]) {
-                    return new Winner(pieces[i][j],i,j,i,j+3);
+        for(int row = 0; row<NUM_OF_ROWS; row++) {
+            for(int col = 0; col<=NUM_OF_COLS-4; col++) {
+                Piece p = pieces[col][row];
+                if(p != Piece.EMPTY &&
+                        p == pieces[col+1][row] &&
+                        p == pieces[col+2][row] &&
+                        p == pieces[col+3][row]) {
+                    return new Winner(p, col, row, col+3, row);
                 }
             }
         }
 
-        for (int i = 0; i < NUM_OF_ROWS; i++) {
-            for (int j = 0; j <= NUM_OF_COLS - 5; j++) {
-                Piece piece = pieces[j][i];
-                if (piece != Piece.EMPTY &&
-                        piece == pieces[j + 1][i] &&
-                        piece == pieces[j + 2][i] &&
-                        piece == pieces[j + 3][i]) {
-                    return new Winner(pieces[i][j],j,i,j+3,i);
+        for(int col = 0; col<NUM_OF_COLS; col++) {
+            for(int row = 0; row<=NUM_OF_ROWS-4; row++) {
+                Piece p = pieces[col][row];
+                if(p != Piece.EMPTY &&
+                        p == pieces[col][row+1] &&
+                        p == pieces[col][row+2] &&
+                        p == pieces[col][row+3]) {
+                    return new Winner(p, col, row, col,row+3);
                 }
             }
         }
